@@ -2,15 +2,15 @@ $users = net user
 $users = -split $users
 $a, $b, $c, $d, $e, $q, $w, $rest = $users
 foreach ($user in $rest | Select-Object -SkipLast 5) {
+    #$pass = Read-Host "Enter Password for ${user}" -AsSecureString
+    #Write-Host "${user} and password ${pass}"
     #net user $user /passwordchg:no
     $userin = Read-Host "${user} disable? [Y,N]"
     if ($userin -eq "Y" -or $userin -eq "y") {
         net user $user /active:no
     }
-    else {
-        #$pass = Read-Host "Enter Password for ${user}" -AsSecureString
-        #Write-Host "${user} and password ${pass}"
-    }
+    
+    
 }
 
 #netsh advfirewall set allprofiles state on
