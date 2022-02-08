@@ -5,6 +5,6 @@ This script goes through each user and asks the person who ran the script if the
 
 It then goes through all users in the administrator group and asks the person running the script to remove a user from the admin group or not. 
 
-make sure you run set-ExecutionPolicy -ExecutionPolicy “unrestricted”
-and then back to restricted after you run the script
-set-ExecutionPolicy -ExecutionPolicy “restricted”
+
+powershell.exe -ExecutionPolicy Bypass -NoProfile C:\Users\%USERNAME%\Desktop\5MinPlanWindows-main\test.ps1
+powershell.exe -ExecutionPolicy Bypass -NoProfile -Command "iex C:\Users\%USERNAME%\Desktop\5MinPlanWindows-main\test.ps1
