@@ -18,7 +18,7 @@ foreach ($user in $rest | Select-Object -SkipLast 5) {
         }
     }
     Write-Output $user
-    if ($isWhiteList -or $user -eq "Administrator") {
+    if ($isWhiteList) {
         $userin = Read-Host "${user} remove from Admin? [Y,N]"
         if ($userin -eq 'Y' -or $userin -eq 'y') {
             Remove-LocalGroupMember -Group "Administrators" -Member $user
@@ -43,7 +43,12 @@ foreach ($user in $rest | Select-Object -SkipLast 5) {
         }
     }
     if(!$isWhiteList) {
-        net user $user /active:no | Out-Null
+        if ($user -eq "Administrator") {
+            net user $user /active:no /time: | Out-Null
+        }
+        else {
+            netuser $user /active:no /passwordchg:no /time: | Out-Null
+            }
 
     }
     
