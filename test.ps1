@@ -28,7 +28,7 @@ foreach ($user in $rest | Select-Object -SkipLast 5) {
     elseif ($user -ne "Administrator") {
         Remove-LocalGroupMember -Group "Administrators" -Member $user   
     }
-    #Rename-LocalUser -Name "Administrator" -NewName "Admimistrator"
+    Rename-LocalUser -Name "Administrator" -NewName "Admimistrator"
 
 }
 
