@@ -3,9 +3,9 @@ $users = -split $users
 $a, $b, $c, $d, $e, $q, $w, $rest = $users
 $pass = Read-Host "Enter Default Password" -AsSecureString
 $isWhiteList = $false
-[string]$whiteList = Read-Host "Enter the list of users you want to keep running"
+[string]$whiteList = Read-Host "Enter the list of users you want to keep running (Don't enter Admin)"
 $whiteListArray = $whiteList.split(" ")
-
+#$whiteListArray.Add("Administrator")
 
 $admin = net localgroup Administrators
 $admin = -split $admin
@@ -17,17 +17,18 @@ foreach ($user in $rest | Select-Object -SkipLast 5) {
             $isWhiteList = $true
         }
     }
-
-    if (!$isWhiteList -and $user -ne "Administrator") {
-        Remove-LocalGroupMember -Group "Administrators" -Member $user
-    }
-    else {
+    Write-Output $user
+    if ($isWhiteList -or $user -eq "Administrator") {
         $userin = Read-Host "${user} remove from Admin? [Y,N]"
         if ($userin -eq 'Y' -or $userin -eq 'y') {
             Remove-LocalGroupMember -Group "Administrators" -Member $user
+            Write-Output "removed from admin"
         }
     }
-     Rename-LocalUser -Name "Administrator" -NewName "Admimistrator"
+    elseif ($user -ne "Administrator") {
+        Remove-LocalGroupMember -Group "Administrators" -Member $user   
+    }
+    #Rename-LocalUser -Name "Administrator" -NewName "Admimistrator"
 
 }
 
