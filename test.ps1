@@ -1,26 +1,61 @@
 $users = net user
 $users = -split $users
 $a, $b, $c, $d, $e, $q, $w, $rest = $users
+$pass = Read-Host "Enter Default Password" -AsSecureString
+$isWhiteList = $false
+[string]$whiteList = Read-Host "Enter the list of users you want to keep running"
+$whiteListArray = $whiteList.split(" ")
+
+
+$admin = net localgroup Administrators
+$admin = -split $admin
+$a, $b, $c, $d, $e, $q, $w, $f, $g, $h, $j, $k, $l, $m, $n, $o, $p, $rest = $admin
 foreach ($user in $rest | Select-Object -SkipLast 5) {
-    $pass = Read-Host "Enter Password for ${user}" -AsSecureString
-    Write-Host "${user} and password ${pass}"
-    net user $user /passwordchg:no
-    $userin = Read-Host "${user} disable? [Y,N]"
-    if ($userin -eq "Y" -or $userin -eq "y") {
-        net user $user /active:no
+
+    foreach ($whiteListMember in $whiteListArray) {
+        if ($whiteListMember -eq $user) {
+            $isWhiteList = $true
+        }
     }
+
+    if (!$isWhiteList -and $user -ne "Administrator") {
+        Remove-LocalGroupMember -Group "Administrators" -Member $user
+    }
+    else {
+        $userin = Read-Host "${user} remove from Admin? [Y,N]"
+        if ($userin -eq 'Y' -or $userin -eq 'y') {
+            Remove-LocalGroupMember -Group "Administrators" -Member $user
+        }
+    }
+     Rename-LocalUser -Name "Administrator" -NewName "Admimistrator"
+
+}
+
+$isWhiteList = $false
+
+foreach ($user in $rest | Select-Object -SkipLast 5) {
+    Write-Host "${user} and password ${pass}" 
+
+    foreach ($whiteListMember in $whiteListArray) {
+        if ($whiteListMember -eq $user) {
+            $isWhiteList = $true
+        }
+    }
+    if(!$isWhiteList) {
+        net user $user /active:no | Out-Null
+
+    }
+    
     
     
 }
 
-#netsh advfirewall set allprofiles state on
-$admin = net localgroup Administrators
-$admin = -split $admin
-$a, $b, $c, $d, $e, $q, $w, $f, $g, $h, $j, $k, $l, $m, $n, $o, $p, $rest = $admin
-foreach ($user in $rest | Select-Object -SkipLast 4) {
-    #net user $user /passwordchg:no
-    $userin = Read-Host "${user} remove from Admin? [Y,N]"
-    if ($userin -eq "Y" -or $userin -eq "y") {
-        Remove-LocalGroupMember -Group "Administrators" -Member $user
-    }
-}
+#Block all ports
+netsh advfirewall set allprofiles firewallpolicy blockinbound,blockoutbound
+
+#Allow firefox
+netsh advfirewall firewall add rule name="Allow Firefox" dir=in action=allow program="C:\Program Files\Mozilla Firefox\firefox.exe" enable=yes profile=any
+netsh advfirewall firewall add rule name="Allow Firefox" dir=out action=allow program="C:\Program Files\Mozilla Firefox\firefox.exe" enable=yes profile=any
+#Allow DNS
+netsh advfirewall firewall add rule name=AdClient dir=out protocol=tcp remoteport=53 action=allow
+netsh advfirewall firewall add rule name=AdClinet dir=in protocol=tcp remoteport=53 action=allow
