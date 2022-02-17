@@ -1,10 +1,12 @@
 # 5MinPlanWindows
 The 5 minute plan for windows
 
-This script goes through each user and asks the person who ran the script if they want to disable certain users and also changes the password for everyone.  It also makes it so that users can't change their own passwords so it will hopefully make it more difficult for red team to setup a password that we don't know
+Script asks user to enter a `default password` and a `whitelist`. It turns off all non-whitelisted users and still asks if the runner of the script wants the whitelisted user to be taken off the administrator list. 
 
-It then goes through all users in the administrator group and asks the person running the script to remove a user from the admin group or not. 
+Download and run script by running the command below in 
 
+```
+powershell.exe -ExecutionPolicy Bypass -NoExit (New-Object System.Net.WebClient).DownloadFile('https://raw.githubusercontent.com/sdd4181/5MinPlanWindows/main/secureStart.ps1', 'C:\Users\%USERNAME%\Desktop\script1.ps1'); iex 'C:\Users\%USERNAME%\Desktop\script1.ps1'
 
-powershell.exe -ExecutionPolicy Bypass -NoProfile C:\Users\%USERNAME%\Desktop\5MinPlanWindows-main\test.ps1
-powershell.exe -ExecutionPolicy Bypass -NoProfile -Command "iex C:\Users\%USERNAME%\Desktop\5MinPlanWindows-main\test.ps1
+```
+
