@@ -1,3 +1,4 @@
+
 $users = net user
 $users = -split $users
 $a, $b, $c, $d, $e, $q, $w, $rest = $users
@@ -56,6 +57,58 @@ foreach ($user in $rest | Select-Object -SkipLast 5) {
     
 }
 
+
+
+
+#if the operating system is 64 bit
+if ([Environment]::Is64BitOperatingSystem) {
+
+    #wireshark download
+    $webClient = New-Object System.Net.WebClient
+    $webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/64Bit/Wireshark-win64-3.6.2.exe', 'C:\binaries\wiresharkInstall.exe')
+    Write-Output "Downloading Wireshark"
+    Start-Sleep -Seconds 5
+    iex 'C:\binaries\wiresharkInstall.exe'
+
+    #procmon download
+    $webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/64Bit/Procmon64.exe', 'C:\binaries\Procmon64.exe')
+    Write-Output "Downloading Process Monitor"
+    Start-Sleep -Seconds 5
+    iex 'C:\binaries\Procmon64.exe'
+
+    #procexp download
+    $webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/64Bit/procexp64.exe', 'C:\binaries\Procexp64.exe')
+    Write-Output "Downloading Process Explorer"
+    Start-Sleep -Seconds 5
+    iex 'C:\binaries\Procexp64.exe'
+}
+
+else {
+
+    $webClient = New-Object System.Net.WebClient
+    $webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/32Bit/Wireshark-win32-3.6.2.exe', 'C:\binaries\wiresharkInstall.exe')
+    Write-Output "Downloading Wireshark"
+    Start-Sleep -Seconds 5
+    iex 'C:\binaries\wiresharkInstall.exe'
+
+    #procmon download
+    $webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/32Bit/Procmon.exe', 'C:\binaries\Procmon.exe')
+    Write-Output "Downloading Process Monitor"
+    Start-Sleep -Seconds 5
+    iex 'C:\binaries\Procmon64.exe'
+
+    #procexp download
+    $webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/32Bit/procexp.exe', 'C:\binaries\Procexp.exe')
+    Write-Output "Downloading Process Explorer"
+    Start-Sleep -Seconds 5
+    iex 'C:\binaries\Procexp.exe'
+
+}
+
+
+
+
+
 #Block all ports
 netsh advfirewall set allprofiles firewallpolicy blockinbound,blockoutbound
 
@@ -65,3 +118,10 @@ netsh advfirewall firewall add rule name="Allow Firefox" dir=out action=allow pr
 #Allow DNS
 netsh advfirewall firewall add rule name=AdClient dir=out protocol=tcp remoteport=53 action=allow
 netsh advfirewall firewall add rule name=AdClinet dir=in protocol=tcp remoteport=53 action=allow
+
+
+
+
+
+
+
