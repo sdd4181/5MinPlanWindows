@@ -119,6 +119,8 @@ netsh advfirewall firewall add rule name="Allow Firefox" dir=out action=allow pr
 netsh advfirewall firewall add rule name=AdClient dir=out protocol=tcp remoteport=53 action=allow
 netsh advfirewall firewall add rule name=AdClinet dir=in protocol=tcp remoteport=53 action=allow
 
+netsh advfirewall reset
+
 
 
 
