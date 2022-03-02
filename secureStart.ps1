@@ -1,31 +1,27 @@
-
+#getting list of users (store in $rest)
 $users = net user
 $users = -split $users
 $a, $b, $c, $d, $e, $q, $w, $rest = $users
-$pass = Read-Host "Enter Default Password" -AsSecureString
-$isWhiteList = $false
-[string]$whiteList = Read-Host "Enter the list of users you want to keep running (Don't enter Admin)"
-$whiteListArray = $whiteList.split(" ")
-#$whiteListArray.Add("Administrator")
 
+#getting list of administrators (store in $remainingAdmin)
 $admin = net localgroup Administrators
 $admin = -split $admin
-$a, $b, $c, $d, $e, $q, $w, $f, $g, $h, $j, $k, $l, $m, $n, $o, $p, $rest = $admin
-foreach ($user in $rest | Select-Object -SkipLast 5) {
+$a, $b, $c, $d, $e, $q, $w, $f, $g, $h, $j, $k, $l, $m, $n, $o, $p, $remainingAdmin = $admin
 
-    foreach ($whiteListMember in $whiteListArray) {
-        if ($whiteListMember -eq $user) {
-            $isWhiteList = $true
-        }
-    }
+
+#getting the one user that we create and want to use
+$liveUser = Read-Host "Enter Username" 
+$pass = Read-Host "Password" -AsSecureString
+$isWhiteList = $false
+
+
+New-LocalUser $liveUser -Password $pass -FullName "Origin User" | Out-Null
+Add-LocalGroupMember -Group "Administrators" -Member $liveUser | Out-Null
+Add-LocalGroupMember -Group "Remote Desktop Users" -Member $liveUser | Out-Null
+
+
+foreach ($user in $remainingAdmin | Select-Object -SkipLast 5) {
     Write-Output $user
-    if ($isWhiteList) {
-        $userin = Read-Host "${user} remove from Admin? [Y,N]"
-        if ($userin -eq 'Y' -or $userin -eq 'y') {
-            Remove-LocalGroupMember -Group "Administrators" -Member $user
-            Write-Output "removed from admin"
-        }
-    }
     elseif ($user -ne "Administrator") {
         Remove-LocalGroupMember -Group "Administrators" -Member $user   
     }
@@ -33,16 +29,8 @@ foreach ($user in $rest | Select-Object -SkipLast 5) {
 }
 
 
-$isWhiteList = $false
 
 foreach ($user in $rest | Select-Object -SkipLast 5) {
-    Write-Host "${user} and password ${pass}" 
-
-    foreach ($whiteListMember in $whiteListArray) {
-        if ($whiteListMember -eq $user) {
-            $isWhiteList = $true
-        }
-    }
     if(!$isWhiteList) {
         if ($user -eq "Administrator") {
             net user $user /active:no /time: | Out-Null
@@ -118,6 +106,7 @@ netsh advfirewall firewall add rule name="Allow Firefox" dir=out action=allow pr
 #Allow DNS
 netsh advfirewall firewall add rule name=AdClient dir=out protocol=tcp remoteport=53 action=allow
 netsh advfirewall firewall add rule name=AdClinet dir=in protocol=tcp remoteport=53 action=allow
+#
 
 netsh advfirewall reset
 
