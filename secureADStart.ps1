@@ -10,7 +10,7 @@ Add-ADGroupMember -Identity Administrators -Members $userName
 Add-ADGroupMember -Identity "Domain Admins" -Members $userName
 Add-ADGroupMember -Identity "Schema Admins" -Members $userName
 
-foreach ($user in enabledUsers) {
+foreach ($user in $enabledUsers) {
     Disable-ADAccount -Identity $user
     remove-adgroupmember -identity Administrators -members $user -verbose -confirm:$false
 }
