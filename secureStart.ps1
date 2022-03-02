@@ -114,7 +114,7 @@ netsh advfirewall firewall add rule name="ICMP block echo requests" protocol=icm
 
 #used to check if its a domain controller
 $osInfo = Get-CimInstance -ClassName Win32_OperatingSystem
-if ($osInfo.ProductType == 2) {
+if ($osInfo.ProductType -eq 2) {
 #if domain controller
 
     #not tested
