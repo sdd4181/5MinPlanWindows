@@ -21,7 +21,7 @@ Add-LocalGroupMember -Group "Remote Desktop Users" -Member $liveUser | Out-Null
 
 foreach ($user in $remainingAdmin | Select-Object -SkipLast 5) {
     Write-Output $user
-    elseif ($user -ne "Administrator") {
+    if ($user -ne "Administrator") {
         Remove-LocalGroupMember -Group "Administrators" -Member $user   
     }
 
