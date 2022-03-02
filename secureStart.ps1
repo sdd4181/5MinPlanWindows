@@ -95,22 +95,42 @@ else {
 
 
 
+#enable all (run as admin) prompts to ask for password
+reg ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v PromptOnSecureDesktop /t REG_DWORD /d 1 /f
+reg add HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System /v EnableLUA /t REG_DWORD /d 1 /f
 
-#Block all ports
-netsh advfirewall set allprofiles firewallpolicy blockinbound,blockoutbound
 
-#Allow firefox
-netsh advfirewall firewall add rule name="Allow Firefox" dir=in action=allow program="C:\Program Files\Mozilla Firefox\firefox.exe" enable=yes profile=any
-netsh advfirewall firewall add rule name="Allow Firefox" dir=out action=allow program="C:\Program Files\Mozilla Firefox\firefox.exe" enable=yes profile=any
-#Allow DNS
-netsh advfirewall firewall add rule name=AdClient dir=out protocol=tcp remoteport=53 action=allow
-netsh advfirewall firewall add rule name=AdClinet dir=in protocol=tcp remoteport=53 action=allow
-#
+
+#turn on firewall
+Set-NetFirewallProfile -Profile Domain, Public, Private -Enabled True
+
+#blocking all icmp
+netsh advfirewall firewall add rule name="ICMP block echo requests" protocol=icmpv4:8,any dir=in action=block
+netsh advfirewall firewall add rule name="ICMP block echo requests" protocol=icmpv4:8,any dir=in action=block
 
 netsh advfirewall reset
 
 
-Set-ExecutionPolicy -ExecutionPolicy Restricted
+
+
+#used to check if its a domain controller
+$osInfo = Get-CimInstance -ClassName Win32_OperatingSystem
+if ($osInfo.ProductType == 2) {
+#if domain controller
+
+    #not tested
+    #port that adds uses to communicate which could be helpful
+    reg add HKLM\SYSTEM\CurrentControlSet\Services\NTDS\Parameters /v TCP/IP Port /t REG_DWORD /d 2044 /f
+    reg add HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters /v DCTcpipPort /t REG_DWORD /d 2045 /f 
+    Restart-Service -Name Netlogon -Force
+
+
+
+    #must restart for reg keys to take effect
+    Restart-Computer -Force
+}
+
+
 
 
 
