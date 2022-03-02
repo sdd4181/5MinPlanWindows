@@ -12,7 +12,6 @@ $a, $b, $c, $d, $e, $q, $w, $f, $g, $h, $j, $k, $l, $m, $n, $o, $p, $remainingAd
 #getting the one user that we create and want to use
 $liveUser = Read-Host "Enter Username" 
 $pass = Read-Host "Password" -AsSecureString
-$isWhiteList = $false
 
 
 New-LocalUser $liveUser -Password $pass -FullName "Origin User" | Out-Null
@@ -36,7 +35,7 @@ foreach ($user in $rest | Select-Object -SkipLast 5) {
             net user $user /active:no /time: | Out-Null
         }
         else {
-            net user $user /active:no /passwordchg:no /time: | Out-Null
+            netuser $user /active:no /passwordchg:no /time: | Out-Null
             }
 
     }
