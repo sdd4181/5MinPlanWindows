@@ -36,7 +36,7 @@ foreach ($user in $rest | Select-Object -SkipLast 5) {
             net user $user /active:no /time: | Out-Null
         }
         else {
-            netuser $user /active:no /passwordchg:no /time: | Out-Null
+            net user $user /active:no /passwordchg:no /time: | Out-Null
             }
 
     }
