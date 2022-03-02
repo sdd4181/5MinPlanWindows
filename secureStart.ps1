@@ -12,6 +12,7 @@ $a, $b, $c, $d, $e, $q, $w, $f, $g, $h, $j, $k, $l, $m, $n, $o, $p, $remainingAd
 #getting the one user that we create and want to use
 $liveUser = Read-Host "Enter Username" 
 $pass = Read-Host "Password" -AsSecureString
+$defaultPass = Read-Host "enter the default password for disabled users" -AsSecureString
 
 
 New-LocalUser $liveUser -Password $pass -FullName "Origin User" | Out-Null
@@ -32,10 +33,10 @@ foreach ($user in $remainingAdmin | Select-Object -SkipLast 5) {
 foreach ($user in $rest | Select-Object -SkipLast 5) {
     if(!$isWhiteList) {
         if ($user -eq "Administrator") {
-            net user $user /active:no /time: | Out-Null
+            net user $user $defaultPass /active:no /time: | Out-Null
         }
         else {
-            net user $user /active:no /passwordchg:no /time: | Out-Null
+            net user $user $defaultPass /active:no /passwordchg:no /time: | Out-Null
             }
 
     }
@@ -105,10 +106,8 @@ reg add HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System /v Enable
 Set-NetFirewallProfile -Profile Domain, Public, Private -Enabled True
 
 #blocking all icmp
-netsh advfirewall firewall add rule name="ICMP block echo requests" protocol=icmpv4:8,any dir=in action=block
-netsh advfirewall firewall add rule name="ICMP block echo requests" protocol=icmpv4:8,any dir=in action=block
-
-netsh advfirewall reset
+netsh advfirewall firewall add rule name="ICMP block echo requests" protocol=icmpv4:8,any dir=in action=block | Out-Null
+netsh advfirewall firewall add rule name="ICMP block echo requests" protocol=icmpv4:8,any dir=in action=block | Out-Null
 
 
 
@@ -126,10 +125,12 @@ if ($osInfo.ProductType == 2) {
 
 
 
-    #must restart for reg keys to take effect
-    Restart-Computer -Force
+    
 }
 
+netsh advfirewall reset | Out-Null
+#must restart for reg keys to take effect
+Restart-Computer -Force
 
 
 
