@@ -14,4 +14,3 @@ foreach ($user in $enabledUsers) {
     Disable-ADAccount -Identity $user
     remove-adgroupmember -identity Administrators -members $user -verbose -confirm:$false
 }
-
