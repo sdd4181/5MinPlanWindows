@@ -15,7 +15,7 @@ $pass = Read-Host "Password" -AsSecureString
 $defaultPass = Read-Host "enter the default password for disabled users" -AsSecureString
 
 
-New-LocalUser $liveUser -Password $pass -FullName "Origin User" | Out-Null
+New-LocalUser $liveUser -Password $pass -FullName $liveUser | Out-Null
 Add-LocalGroupMember -Group "Administrators" -Member $liveUser | Out-Null
 Add-LocalGroupMember -Group "Remote Desktop Users" -Member $liveUser | Out-Null
 
