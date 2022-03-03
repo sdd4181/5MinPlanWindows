@@ -15,7 +15,7 @@ Add-ADGroupMember -Identity "Schema Admins" -Members $userName
 $Hours = New-Object byte[] 21
 $replaceHashTable = New-Object HashTable
 $replaceHashTable.Add("logonHours", $Hours)
-foreach ($user in enabledUsers) {
+foreach ($user in $enabledUsers) {
     Set-AdUser -Identity $user -Replace $replaceHashTable
     Disable-ADAccount -Identity $user
     if ($user -ne "Administrator") {
