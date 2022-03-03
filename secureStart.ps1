@@ -19,7 +19,7 @@ if ($osInfo.ProductType -eq 2) {
     Add-ADGroupMember -Identity Administrators -Members $liveUser
     Add-ADGroupMember -Identity "Domain Admins" -Members $liveUser
     Add-ADGroupMember -Identity "Schema Admins" -Members $liveUser
-    Add-LocalGroupMember -Group "Remote Desktop Users" -Member $liveUser
+    Add-ADGroupMember -Identity "Remote Desktop Users" -Members $liveUser
 
 
     #setting up disabled users to also not be able to login at any time during the day even if account got reinabled
@@ -40,7 +40,7 @@ if ($osInfo.ProductType -eq 2) {
 
     #not tested
     #port that adds uses to communicate which could be helpful
-    reg add HKLM\SYSTEM\CurrentControlSet\Services\NTDS\Parameters /v TCP/IP Port /t REG_DWORD /d 2044 /f
+    reg add HKLM\SYSTEM\CurrentControlSet\Services\NTDS\Parameters /v "TCP/IP Port" /t REG_DWORD /d 2044 /f
     reg add HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters /v DCTcpipPort /t REG_DWORD /d 2045 /f 
     Restart-Service -Name Netlogon -Force
 
