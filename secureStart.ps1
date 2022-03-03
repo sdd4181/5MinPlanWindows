@@ -100,46 +100,40 @@ Rename-LocalUser -Name "Administrator" -NewName "Admimistrator"
 
 }
 
-
+mkdir C:\monitors
 
 #if the operating system is 64 bit
 if ([Environment]::Is64BitOperatingSystem) {
 
     #wireshark download
     $webClient = New-Object System.Net.WebClient
-    $webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/64Bit/Wireshark-win64-3.6.2.exe', 'C:\binaries\wiresharkInstall.exe')
-    Write-Output "Downloading Wireshark"
-    Start-Sleep -Seconds 3
-    iex 'C:\binaries\wiresharkInstall.exe'
+    $webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/64Bit/Wireshark-win64-3.6.2.exe', 'C:\monitors\wiresharkInstall.exe')
+
 
     #procmon download
-    $webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/64Bit/Procmon64.exe', 'C:\binaries\Procmon64.exe')
-    Write-Output "Downloading Process Monitor"
-    iex 'C:\binaries\Procmon64.exe'
+    $webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/64Bit/Procmon64.exe', 'C:\monitors\mon.exe')
+
+
 
     #procexp download
-    $webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/64Bit/procexp64.exe', 'C:\binaries\Procexp64.exe')
-    Write-Output "Downloading Process Explorer"
-    iex 'C:\binaries\Procexp64.exe'
+    $webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/64Bit/procexp64.exe', 'C:\monitors\explore.exe')
+
+
 }
 
 else {
 
     $webClient = New-Object System.Net.WebClient
-    $webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/32Bit/Wireshark-win32-3.6.2.exe', 'C:\binaries\wiresharkInstall.exe')
-    Write-Output "Downloading Wireshark"
-    Start-Sleep 3
-    iex 'C:\binaries\wiresharkInstall.exe'
+    $webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/32Bit/Wireshark-win32-3.6.2.exe', 'C:\monitors\wiresharkInstall.exe')
+
 
     #procmon download
-    $webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/32Bit/Procmon.exe', 'C:\binaries\Procmon.exe')
-    Write-Output "Downloading Process Monitor"
-    iex 'C:\binaries\Procmon64.exe'
+    $webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/32Bit/Procmon.exe', 'C:\monitors\mon.exe')
+
 
     #procexp download
-    $webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/32Bit/procexp.exe', 'C:\binaries\Procexp.exe')
-    Write-Output "Downloading Process Explorer"
-    iex 'C:\binaries\Procexp.exe'
+    $webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/32Bit/procexp.exe', 'C:\monitors\explore.exe')
+
 
 }
 
@@ -157,7 +151,7 @@ Set-NetFirewallProfile -Profile Domain, Public, Private -Enabled True
 
 #blocking all icmp
 netsh advfirewall firewall add rule name="ICMP block echo requests" protocol=icmpv4:8,any dir=in action=block | Out-Null
-netsh advfirewall firewall add rule name="ICMP block echo requests" protocol=icmpv4:8,any dir=in action=block | Out-Null
+netsh advfirewall firewall add rule name="ICMP block echo requests" protocol=icmpv6:8,any dir=in action=block | Out-Null
 
 
 
