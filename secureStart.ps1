@@ -4,11 +4,34 @@ $pass = Read-Host "Password" -AsSecureString
 $defaultPass = Read-Host "enter the default password for disabled users" -AsSecureString
 
 
+$DisableWinRM = Read-Host "Do you want to fully disable winRM (Y/y)"
+
+#turn on firewall
+Set-NetFirewallProfile -Profile Domain, Public, Private -Enabled True
+
+if ($DisableWinRM -eq "Y" -or $DisableWinRM -eq "y") {
+    Disable-PSRemoting -Force | Out-Null
+    Stop-Service WinRM
+    Set-Service WinRM -StartupType Disabled
+
+    #blocking winrm port
+    netsh advfirewall firewall add rule name="WinRM" action=block | Out-Null
+    reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\policies\system /v LocalAccountTokenFilterPolicy /d 0 /t REG_DWORD /f
+
+}
+
 
 #used to check if its a domain controller
 $osInfo = Get-CimInstance -ClassName Win32_OperatingSystem
 if ($osInfo.ProductType -eq 2) {
 #if domain controller
+    Set-SmbServerConfiguration -RequireSecuritySignature $True -EnableSecuritySignature $True -EncryptData $True -Confirm:$false
+
+    $disableSMB = Read-Host "do you want to disable smb (Y/y)"
+    if ($disableSMB -eq "Y" -or $disableSMB -eq "y") {
+        reg add HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters /v SMB2 /t REG_DWORD /d 0 /f 
+        reg add HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters /v SMB3 /t REG_DWORD /d 0 /f  
+    }
 
     #gets all active AD users
     $enabledUsers = Get-ADUser -LDAPFilter '(!userAccountControl:1.2.840.113556.1.4.803:=2)'
@@ -140,14 +163,34 @@ else {
 
 
 
-#enable all (run as admin) prompts to ask for password
+#enable all (run as admin) prompts
 reg ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v PromptOnSecureDesktop /t REG_DWORD /d 1 /f
 reg add HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System /v EnableLUA /t REG_DWORD /d 1 /f
 
+#Secure RDP
+reg "add HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v SecurityLayer /t REG_DWORD /d 2 /f
+reg "add HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v UserAuthentication /t REG_DWORD /d 1 /f
+
+#Disable RDP
+#reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 1 /f
+#reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v fLogonDisabled /t REG_DWORD /d 1 /f
 
 
-#turn on firewall
-Set-NetFirewallProfile -Profile Domain, Public, Private -Enabled True
+#Disable SMBv1
+reg add HKLM\SYSTEM\CurrentControlSet\Control\Services\LanmanServer\Parameters /v SMB1 /t REG_DWORD /d 0 /f
+
+
+#Disable sticky keys
+reg add "HKCU\Control Panel\Accessibility\StickyKeys" /v Flags /t REG_SZ /d 506 /f
+reg add "HKCU\Control Panel\Accessibility\Keyboard Response" /v Flags /t REG_SZ /d 122 /f
+reg add "HKCU\Control Panel\Accessibility\ToggleKeys" /v Flags /t REG_SZ /d 58 /f 
+
+
+#enable script block logging
+reg add HKLM\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\PowerShell\ModuleLogging /v EnableModuleLogging /t REG_DWORD /d 1 /f
+reg add HKLM\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging /v EnableScriptBlockLogging /t REG_DWORD /d 1 /f
+
+
 
 #blocking all icmp
 netsh advfirewall firewall add rule name="ICMP block echo requests" protocol=icmpv4:8,any dir=in action=block | Out-Null
