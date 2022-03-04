@@ -192,13 +192,34 @@ reg add HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System /v Enable
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v SecurityLayer /t REG_DWORD /d 2 /f | Out-Null
 reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v UserAuthentication /t REG_DWORD /d 1 /f | Out-Null
 
-#Disable RDP
-#reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 1 /f | Out-Null
-#reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v fLogonDisabled /t REG_DWORD /d 1 /f | Out-Null
 
+$disableRDP = Read-Host "Do you want to disable RDP? (Y/y)"
+if ($DisableWinRM -eq "Y" -or $DisableWinRM -eq "y") {
+    $disableRDP = Read-Host "Are you sure you want to disable RDP? (Yes/yes)"
+    #Disable RDP
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 1 /f | Out-Null
+    reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v fLogonDisabled /t REG_DWORD /d 1 /f | Out-Null
+}
+
+#Disable run once
+reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer /v DisableLocalMachineRunOnce /t REG_DWORD /d 1 /f
+reg add HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer /v DisableCurrentUserRunOnce /t REG_DWORD /d 1 /f
+
+
+#Disable run
+reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer /v DisableLocalMachineRun /t REG_DWORD /d 1 /f
+reg add HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\Explorer /v DisableCurrentUserRun /t REG_DWORD /d 1 /f
 
 #Disable SMBv1
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Services\LanmanServer\Parameters /v SMB1 /t REG_DWORD /d 0 /f | Out-Null
+
+
+
+#enable smb signing idk what it do tbh
+reg add HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\LanManServer\Parameters /v EnableSecuritySignature /t REG_DWORD /d 1 /f | Out-Null
+reg add HKEY_LOCAL_MACHINE\System\CurrentControlSet\Services\LanManServer\Parameters /v RequireSecuritySignature /t REG_DWORD /d 1 /f | Out-Null
+reg add HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Rdr\Parameters /v EnableSecuritySignature /t REG_DWORD /d 1 /f | Out-Null
+reg add HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\Rdr\Parameters /v RequireSecuritySignature /t REG_DWORD /d 1 /f | Out-Null
 
 
 #Disable sticky keys
@@ -213,10 +234,17 @@ reg add HKLM\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging /
 
 
 
-#blocking all icmp
-netsh advfirewall firewall add rule name="ICMP block echo requests" protocol=icmpv4:8,any dir=in action=block | Out-Null
-netsh advfirewall firewall add rule name="ICMP block echo requests" protocol=icmpv6:8,any dir=in action=block | Out-Null
 
+
+$disableICMP = Read-Host "Do you want to disable ICMP? (Y/y)"
+if ($DisableWinRM -eq "Y" -or $DisableWinRM -eq "y") {
+
+    #blocking icmpv4 requests
+    netsh advfirewall firewall add rule name="ICMP block echo requests" protocol=icmpv4:8,any dir=in action=block | Out-Null
+    
+}
+#blocking icmpv6 requests
+netsh advfirewall firewall add rule name="ICMP block echo requests" protocol=icmpv6:8,any dir=in action=block | Out-Null
 
 
 
