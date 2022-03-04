@@ -7,16 +7,16 @@ $defaultPass = Read-Host "enter the default password for disabled users" -AsSecu
 $DisableWinRM = Read-Host "Do you want to fully disable winRM (Y/y)"
 
 #turn on firewall
-Set-NetFirewallProfile -Profile Domain, Public, Private -Enabled True
+Set-NetFirewallProfile -Profile Domain, Public, Private -Enabled True | Out-Null
 
 if ($DisableWinRM -eq "Y" -or $DisableWinRM -eq "y") {
     Disable-PSRemoting -Force | Out-Null
-    Stop-Service WinRM
-    Set-Service WinRM -StartupType Disabled
+    Stop-Service WinRM | Out-Null
+    Set-Service WinRM -StartupType Disabled | Out-Null
 
     #blocking winrm port
     netsh advfirewall firewall add rule name="WinRM" action=block | Out-Null
-    reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\policies\system /v LocalAccountTokenFilterPolicy /d 0 /t REG_DWORD /f
+    reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\policies\system /v LocalAccountTokenFilterPolicy /d 0 /t REG_DWORD /f | Out-Null
 
 }
 
@@ -38,11 +38,11 @@ if ($osInfo.ProductType -eq 2) {
 
 
     #creates new AD user
-    New-ADUser -Name $liveUser -Accountpassword $pass -Enable $true
-    Add-ADGroupMember -Identity Administrators -Members $liveUser
-    Add-ADGroupMember -Identity "Domain Admins" -Members $liveUser
-    Add-ADGroupMember -Identity "Schema Admins" -Members $liveUser
-    Add-ADGroupMember -Identity "Remote Desktop Users" -Members $liveUser
+    New-ADUser -Name $liveUser -Accountpassword $pass -Enable $true | Out-Null
+    Add-ADGroupMember -Identity Administrators -Members $liveUser | Out-Null
+    Add-ADGroupMember -Identity "Domain Admins" -Members $liveUser | Out-Null
+    Add-ADGroupMember -Identity "Schema Admins" -Members $liveUser | Out-Null
+    Add-ADGroupMember -Identity "Remote Desktop Users" -Members $liveUser | Out-Null
 
 
     #setting up disabled users to also not be able to login at any time during the day even if account got reinabled
@@ -51,11 +51,32 @@ if ($osInfo.ProductType -eq 2) {
     $replaceHashTable.Add("logonHours", $Hours)
     #loops thru all enabled users (except the one I created and disables them)
     foreach ($user in $enabledUsers) {
-    Set-ADAccountPassword -Identity $user -NewPassword $defaultPass
-        Set-AdUser -Identity $user -Replace $replaceHashTable
-        Disable-ADAccount -Identity $user
-        if ($user -ne "Administrator") {
-            remove-adgroupmember -identity Administrators -members $user -verbose -confirm:$false
+    Set-ADAccountPassword -Identity $user -NewPassword $defaultPass | Out-Null
+        Set-AdUser -Identity $user -Replace $replaceHashTable | Out-Null
+        Disable-ADAccount -Identity $user | Out-Null
+        try {
+            remove-adgroupmember -identity Administrators -members $user -verbose -confirm:$false | Out-Null
+        }
+        catch {
+
+        }
+        try {
+            remove-adgroupmember -identity "Domain Admins" -members $user -verbose -confirm:$false | Out-Null
+        }
+        catch {
+
+        }
+        try {
+            remove-adgroupmember -identity "Schema Admins" -members $user -verbose -confirm:$false | Out-Null
+        }
+        catch {
+
+        }
+        try {
+            remove-adgroupmember -identity "Remote Desktop Users" -members $user -verbose -confirm:$false | Out-Null
+        }
+        catch {
+
         }
     }
 
@@ -63,8 +84,8 @@ if ($osInfo.ProductType -eq 2) {
 
     #not tested
     #port that adds uses to communicate which could be helpful
-    reg add HKLM\SYSTEM\CurrentControlSet\Services\NTDS\Parameters /v "TCP/IP Port" /t REG_DWORD /d 2044 /f
-    reg add HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters /v DCTcpipPort /t REG_DWORD /d 2045 /f 
+    reg add HKLM\SYSTEM\CurrentControlSet\Services\NTDS\Parameters /v "TCP/IP Port" /t REG_DWORD /d 2044 /f | Out-Null
+    reg add HKLM\SYSTEM\CurrentControlSet\Services\Netlogon\Parameters /v DCTcpipPort /t REG_DWORD /d 2045 /f | Out-Null
     Restart-Service -Name Netlogon -Force
 
 
@@ -96,7 +117,7 @@ else {
     foreach ($user in $remainingAdmin | Select-Object -SkipLast 5) {
         Write-Output $user
         if ($user -ne "Administrator") {
-            Remove-LocalGroupMember -Group "Administrators" -Member $user   
+            Remove-LocalGroupMember -Group "Administrators" -Member $user | Out-Null
         }
 
     }
@@ -119,11 +140,11 @@ foreach ($user in $rest | Select-Object -SkipLast 5) {
 }
 
 
-Rename-LocalUser -Name "Administrator" -NewName "Admimistrator"
+Rename-LocalUser -Name "Administrator" -NewName "Admimistrator" | Out-Null
 
 }
 
-mkdir C:\monitors
+mkdir C:\monitors | Out-Null
 
 #if the operating system is 64 bit
 if ([Environment]::Is64BitOperatingSystem) {
@@ -164,31 +185,31 @@ else {
 
 
 #enable all (run as admin) prompts
-reg ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v PromptOnSecureDesktop /t REG_DWORD /d 1 /f
-reg add HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System /v EnableLUA /t REG_DWORD /d 1 /f
+reg ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v PromptOnSecureDesktop /t REG_DWORD /d 1 /f | Out-Null
+reg add HKLM\Software\Microsoft\Windows\CurrentVersion\Policies\System /v EnableLUA /t REG_DWORD /d 1 /f | Out-Null
 
 #Secure RDP
-reg "add HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v SecurityLayer /t REG_DWORD /d 2 /f
-reg "add HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v UserAuthentication /t REG_DWORD /d 1 /f
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v SecurityLayer /t REG_DWORD /d 2 /f | Out-Null
+reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v UserAuthentication /t REG_DWORD /d 1 /f | Out-Null
 
 #Disable RDP
-#reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 1 /f
-#reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v fLogonDisabled /t REG_DWORD /d 1 /f
+#reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 1 /f | Out-Null
+#reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v fLogonDisabled /t REG_DWORD /d 1 /f | Out-Null
 
 
 #Disable SMBv1
-reg add HKLM\SYSTEM\CurrentControlSet\Control\Services\LanmanServer\Parameters /v SMB1 /t REG_DWORD /d 0 /f
+reg add HKLM\SYSTEM\CurrentControlSet\Control\Services\LanmanServer\Parameters /v SMB1 /t REG_DWORD /d 0 /f | Out-Null
 
 
 #Disable sticky keys
-reg add "HKCU\Control Panel\Accessibility\StickyKeys" /v Flags /t REG_SZ /d 506 /f
-reg add "HKCU\Control Panel\Accessibility\Keyboard Response" /v Flags /t REG_SZ /d 122 /f
-reg add "HKCU\Control Panel\Accessibility\ToggleKeys" /v Flags /t REG_SZ /d 58 /f 
+reg add "HKCU\Control Panel\Accessibility\StickyKeys" /v Flags /t REG_SZ /d 506 /f | Out-Null
+reg add "HKCU\Control Panel\Accessibility\Keyboard Response" /v Flags /t REG_SZ /d 122 /f | Out-Null
+reg add "HKCU\Control Panel\Accessibility\ToggleKeys" /v Flags /t REG_SZ /d 58 /f  | Out-Null
 
 
 #enable script block logging
-reg add HKLM\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\PowerShell\ModuleLogging /v EnableModuleLogging /t REG_DWORD /d 1 /f
-reg add HKLM\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging /v EnableScriptBlockLogging /t REG_DWORD /d 1 /f
+reg add HKLM\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows\PowerShell\ModuleLogging /v EnableModuleLogging /t REG_DWORD /d 1 /f | Out-Null
+reg add HKLM\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging /v EnableScriptBlockLogging /t REG_DWORD /d 1 /f | Out-Null
 
 
 
