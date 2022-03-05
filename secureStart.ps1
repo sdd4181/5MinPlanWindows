@@ -1,7 +1,21 @@
 #getting the one user that we create and want to use
 $liveUser = Read-Host "Enter Username" 
-$pass = Read-Host "Password" -AsSecureString
+$passNotEqual = $false
+#do while loop that confirms password entered is consistient
+DO {
+    if ($passNotEqual) {
+        Write-Output "Passwords didn't match"
+    }
+    $pass = Read-Host "Enter Password" -AsSecureString
+    $passConfirm = Read-Host "re-enter password to confirm" -AsSecureString
+
+} While ($pass -ne $passConfirm)
+
+
+
+
 $defaultPass = Read-Host "enter the default password for disabled users" -AsSecureString
+
 
 
 $DisableWinRM = Read-Host "Do you want to fully disable winRM (Y/y)"
@@ -194,11 +208,13 @@ reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-T
 
 
 $disableRDP = Read-Host "Do you want to disable RDP? (Y/y)"
-if ($DisableWinRM -eq "Y" -or $DisableWinRM -eq "y") {
-    $disableRDP = Read-Host "Are you sure you want to disable RDP? (Yes/yes)"
-    #Disable RDP
-    reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 1 /f | Out-Null
-    reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v fLogonDisabled /t REG_DWORD /d 1 /f | Out-Null
+if ($disableRDP -eq "Y" -or $disableRDP -eq "y") {
+    $disableRDPConfirm = Read-Host "Are you sure you want to disable RDP? (Y/y)"
+    if ($disableRDP -eq "Y" -or $disableRDP -eq "y") {
+        #Disable RDP
+        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 1 /f | Out-Null
+        reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v fLogonDisabled /t REG_DWORD /d 1 /f | Out-Null
+    }
 }
 
 #Disable run once
