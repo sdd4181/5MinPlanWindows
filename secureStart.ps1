@@ -12,8 +12,9 @@ DO {
     $passText = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($pass))
     $passConfirmText = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($passConfirm))
 
-    $passNotEqual = $True
-} While ($passText -ne $passConfirmText)
+
+        $passNotEqual = $True
+} While ($passText -cne $passConfirmText)
 
 
 
