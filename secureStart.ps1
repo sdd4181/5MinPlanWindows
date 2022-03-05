@@ -9,7 +9,11 @@ DO {
     $pass = Read-Host "Enter Password" -AsSecureString
     $passConfirm = Read-Host "re-enter password to confirm" -AsSecureString
 
-} While ($pass -ne $passConfirm)
+    $passText = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($pass))
+    $passConfirmText = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($passConfirm))
+
+    $passNotEqual = $True
+} While ($passText -ne $passConfirmText)
 
 
 
