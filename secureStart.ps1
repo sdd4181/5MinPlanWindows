@@ -71,7 +71,7 @@ if ($osInfo.ProductType -eq 2) {
     #loops thru all enabled users (except the one I created and disables them)
     foreach ($user in $enabledUsers) {
     Set-ADAccountPassword -Identity $user -NewPassword $defaultPass | Out-Null
-        Set-AdUser -Identity $user -Replace $replaceHashTable | Out-Null
+        #Set-AdUser -Identity $user -Replace $replaceHashTable | Out-Null
         Disable-ADAccount -Identity $user | Out-Null
         try {
             remove-adgroupmember -identity Administrators -members $user -verbose -confirm:$false | Out-Null
