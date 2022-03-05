@@ -278,7 +278,7 @@ netsh advfirewall firewall add rule name="ICMP block echo requests" protocol=icm
 
 netsh advfirewall reset | Out-Null
 #must restart for reg keys to take effect
-Restart-Computer -Force
+#Restart-Computer -Force
 
 
 
