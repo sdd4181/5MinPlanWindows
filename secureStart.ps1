@@ -70,7 +70,9 @@ if ($osInfo.ProductType -eq 2) {
     $replaceHashTable.Add("logonHours", $Hours)
     #loops thru all enabled users (except the one I created and disables them)
     foreach ($user in $enabledUsers) {
-    Set-ADAccountPassword -Identity $user -NewPassword $defaultPass | Out-Null
+        $changeUser = Read-Host "do you want to change" + $user + "(Y/N)
+        if ($changeUser -eq "N" -or $changeUser -eq "n") {continue}
+        Set-ADAccountPassword -Identity $user -NewPassword $defaultPass | Out-Null
         Set-AdUser -Identity $user -Replace $replaceHashTable | Out-Null
         Disable-ADAccount -Identity $user | Out-Null
         try {
