@@ -70,7 +70,7 @@ if ($osInfo.ProductType -eq 2) {
     $replaceHashTable.Add("logonHours", $Hours)
     #loops thru all enabled users (except the one I created and disables them)
     foreach ($user in $enabledUsers) {
-        $changeUser = Read-Host "do you want to change" + $user + "(Y/N)
+        $changeUser = Read-Host "do you want to change" $user "(Y/N)"
         if ($changeUser -eq "N" -or $changeUser -eq "n") {continue}
         Set-ADAccountPassword -Identity $user -NewPassword $defaultPass | Out-Null
         Set-AdUser -Identity $user -Replace $replaceHashTable | Out-Null
@@ -136,8 +136,9 @@ else {
 
 
     foreach ($user in $remainingAdmin | Select-Object -SkipLast 5) {
-        Write-Output $user
         if ($user -ne "Administrator") {
+            $changeUser = Read-Host "do you want to change" $user "(Y/N)"
+            if ($changeUser -eq "N" -or $changeUser -eq "n") {continue}
             Remove-LocalGroupMember -Group "Administrators" -Member $user | Out-Null
         }
 
@@ -146,15 +147,16 @@ else {
 
 
 foreach ($user in $rest | Select-Object -SkipLast 5) {
-    if(!$isWhiteList) {
-        if ($user -eq "Administrator") {
-            net user $user $defaultPass /active:no /time: | Out-Null
-        }
-        else {
-            net user $user $defaultPass /active:no /passwordchg:no /time: | Out-Null
-            }
 
+    if ($user -eq "Administrator") {
+        $changeUser = Read-Host "do you want to change" $user "(Y/N)"
+        if ($changeUser -eq "N" -or $changeUser -eq "n") {continue}
+        net user $user $defaultPass /active:no /time: | Out-Null
     }
+    else {
+        net user $user $defaultPass /active:no /passwordchg:no /time: | Out-Null
+        }
+
     
     
     
@@ -171,33 +173,33 @@ mkdir C:\monitors | Out-Null
 if ([Environment]::Is64BitOperatingSystem) {
 
     #wireshark download
-    $webClient = New-Object System.Net.WebClient
-    $webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/64Bit/Wireshark-win64-3.6.2.exe', 'C:\monitors\wiresharkInstall.exe')
+    #$webClient = New-Object System.Net.WebClient
+    #$webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/64Bit/Wireshark-win64-3.6.2.exe', 'C:\monitors\wiresharkInstall.exe')
 
 
     #procmon download
-    $webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/64Bit/Procmon64.exe', 'C:\monitors\mon.exe')
+    #$webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/64Bit/Procmon64.exe', 'C:\monitors\mon.exe')
 
 
 
     #procexp download
-    $webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/64Bit/procexp64.exe', 'C:\monitors\explore.exe')
+    #$webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/64Bit/procexp64.exe', 'C:\monitors\explore.exe')
 
 
 }
 
 else {
 
-    $webClient = New-Object System.Net.WebClient
-    $webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/32Bit/Wireshark-win32-3.6.2.exe', 'C:\monitors\wiresharkInstall.exe')
+    #$webClient = New-Object System.Net.WebClient
+    #$webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/32Bit/Wireshark-win32-3.6.2.exe', 'C:\monitors\wiresharkInstall.exe')
 
 
     #procmon download
-    $webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/32Bit/Procmon.exe', 'C:\monitors\mon.exe')
+    #$webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/32Bit/Procmon.exe', 'C:\monitors\mon.exe')
 
 
     #procexp download
-    $webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/32Bit/procexp.exe', 'C:\monitors\explore.exe')
+    #$webClient.DownloadFile('https://github.com/sdd4181/5MinPlanWindows/raw/main/32Bit/procexp.exe', 'C:\monitors\explore.exe')
 
 
 }
@@ -217,7 +219,7 @@ reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-T
 $disableRDP = Read-Host "Do you want to disable RDP? (Y/y)"
 if ($disableRDP -eq "Y" -or $disableRDP -eq "y") {
     $disableRDPConfirm = Read-Host "Are you sure you want to disable RDP? (Y/y)"
-    if ($disableRDP -eq "Y" -or $disableRDP -eq "y") {
+    if ($disableRDPConfirm -eq "Y" -or $disableRDPConfirm -eq "y") {
         #Disable RDP
         reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server" /v fDenyTSConnections /t REG_DWORD /d 1 /f | Out-Null
         reg add "HKLM\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp" /v fLogonDisabled /t REG_DWORD /d 1 /f | Out-Null
@@ -260,7 +262,7 @@ reg add HKLM\Software\Policies\Microsoft\Windows\PowerShell\ScriptBlockLogging /
 
 
 $disableICMP = Read-Host "Do you want to disable ICMP? (Y/y)"
-if ($DisableWinRM -eq "Y" -or $DisableWinRM -eq "y") {
+if ($disableICMP -eq "Y" -or $disableICMP -eq "y") {
 
     #blocking icmpv4 requests
     netsh advfirewall firewall add rule name="ICMP block echo requests" protocol=icmpv4:8,any dir=in action=block | Out-Null
